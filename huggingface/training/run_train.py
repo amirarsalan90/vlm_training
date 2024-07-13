@@ -1,5 +1,8 @@
 import os
+import logging
 
+
+import wandb
 import pandas as pd
 from transformers import TrainingArguments
 from transformers import Trainer
@@ -8,6 +11,10 @@ from modules.model import get_processor, get_model, ImageTextInstructionFollowin
 from modules.utils import freeze_network, count_trainable_parameters
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["WANDB_PROJECT"]="vlm"
+#logging.set_verbosity_error()
+wandb.login()
+
 
 processor = get_processor(
     image_processor_id="openai/clip-vit-large-patch14", 
@@ -36,22 +43,22 @@ data_collator = MyCustomDataCollator(processor=processor)
 
 
 training_args = TrainingArguments(
-    #report_to = 'wandb',
-    output_dir="./outputs/phi_adaptor-test3",
+    report_to = 'wandb',
+    output_dir="./outputs/phi_adaptor_hf",
     remove_unused_columns=False,
     save_strategy="steps",
-    save_steps=100,
-    learning_rate=1e-5,
+    save_steps=1000,
+    learning_rate=1e-4,
     gradient_accumulation_steps=16,
-    per_device_train_batch_size=4,
+    per_device_train_batch_size=8,
     #bf16=True,
     #bf16_full_eval=True,
     warmup_steps=0,
     lr_scheduler_type="linear",
     lr_scheduler_kwargs={},
-    max_steps=3000,
+    max_steps=4000,
     dataloader_num_workers=14,
-    logging_steps=1,
+    logging_steps=10,
     per_device_eval_batch_size=4,
     evaluation_strategy="steps",
     eval_steps=1000,

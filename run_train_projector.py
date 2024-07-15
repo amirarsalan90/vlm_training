@@ -1,18 +1,15 @@
 import os
-import logging
-
 
 import wandb
 import pandas as pd
 from transformers import TrainingArguments
 from transformers import Trainer
 
-from modules.model import get_processor, get_model, ImageTextInstructionFollowingDataset, MyCustomDataCollator
-from modules.utils import freeze_network, count_trainable_parameters
+from modules.model import get_processor, get_model
+from modules.utils import ProjectorTrainingDataset, ProjectorTrainingDataCollator, freeze_network, count_trainable_parameters
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["WANDB_PROJECT"]="vlm"
-#logging.set_verbosity_error()
 wandb.login()
 
 
@@ -30,16 +27,16 @@ model = get_model(vision_tower_id="openai/clip-vit-large-patch14",
 
 train_df = pd.read_json("/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/chat_train.json", lines=True)
 
-train_dataset = ImageTextInstructionFollowingDataset(data=train_df, 
+train_dataset = ProjectorTrainingDataset(data=train_df, 
                                                      image_folder_path="/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/images"
                                                      )
 
 eval_df = pd.read_json("/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/chat_val_5K.json", lines=True)
-eval_dataset = ImageTextInstructionFollowingDataset(data=eval_df, 
+eval_dataset = ProjectorTrainingDataset(data=eval_df, 
                                                     image_folder_path="/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/images"
                                                     )
 
-data_collator = MyCustomDataCollator(processor=processor)
+data_collator = ProjectorTrainingDataCollator(processor=processor)
 
 
 training_args = TrainingArguments(
@@ -51,8 +48,6 @@ training_args = TrainingArguments(
     learning_rate=1e-4,
     gradient_accumulation_steps=16,
     per_device_train_batch_size=8,
-    #bf16=True,
-    #bf16_full_eval=True,
     warmup_steps=0,
     lr_scheduler_type="linear",
     lr_scheduler_kwargs={},

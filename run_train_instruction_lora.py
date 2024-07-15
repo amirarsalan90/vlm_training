@@ -1,16 +1,13 @@
-import requests
-import os
-
 import torch
 import pandas as pd
 import wandb
 from PIL import Image
-from transformers import LlavaForConditionalGeneration, AutoTokenizer, AutoProcessor, TrainingArguments, LlavaForConditionalGeneration, BitsAndBytesConfig
+from transformers import LlavaForConditionalGeneration, TrainingArguments, LlavaForConditionalGeneration, BitsAndBytesConfig
 from trl import SFTTrainer
 from peft import LoraConfig
 
-from modules.model import get_model, get_processor
-from modules.model import get_processor, get_model, ImageTextInstructionFollowingDataset2, MyCustomDataCollator2
+from modules.model import get_processor
+from modules.utils import InstructionFineTuningDataset, InstructionFineTuningDataCollator
 
 
 #os.environ["WANDB_PROJECT"]="vlm"
@@ -24,7 +21,7 @@ processor = get_processor(
     image_token="<image>"
     )
 
-checkpoint_path = "./training/outputs/phi_adaptor_hf/checkpoint-4000/"  # or the specific checkpoint you want to load
+checkpoint_path = "./training/outputs/phi_adaptor_hf/checkpoint-4000/"
 
 model = LlavaForConditionalGeneration.from_pretrained(checkpoint_path)
 
@@ -40,15 +37,15 @@ PHI_CHAT_TEMPLATE = processor.tokenizer.default_chat_template
 processor.tokenizer.chat_template = PHI_CHAT_TEMPLATE
     
 
-data_collator = MyCustomDataCollator2(processor=processor)
+data_collator = InstructionFineTuningDataCollator(processor=processor)
 
 train_df = pd.read_json("/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/instruction_finetune/instruction_train_all.json", lines=True)
-train_dataset = ImageTextInstructionFollowingDataset2(data=train_df, 
+train_dataset = InstructionFineTuningDataset(data=train_df, 
                                                      image_folder_path="/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/instruction_finetune"
                                                      )
 
 eval_df = pd.read_json("/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/instruction_finetune/instruction_val_5K_all.json", lines=True)
-eval_dataset = ImageTextInstructionFollowingDataset2(data=eval_df, 
+eval_dataset = InstructionFineTuningDataset(data=eval_df, 
                                                      image_folder_path="/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/instruction_finetune"
                                                      )
 

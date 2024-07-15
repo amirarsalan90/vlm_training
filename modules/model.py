@@ -26,7 +26,7 @@ class LlavaMultiModalProjector(nn.Module):
 
 class CustomLlavaForConditionalGeneration(LlavaForConditionalGeneration):
     def __init__(self, config: LlavaConfig):
-        super(LlavaForConditionalGeneration, self).__init__(config)  # Use super() to call the parent class constructor
+        super(LlavaForConditionalGeneration, self).__init__(config)  
         self.vision_tower = CLIPVisionModel.from_pretrained(config.vision_config._name_or_path,
                                                             torch_dtype=torch.float32)
 
@@ -41,126 +41,12 @@ class CustomLlavaForConditionalGeneration(LlavaForConditionalGeneration):
 
 
 
-class ImageTextInstructionFollowingDataset(torch.utils.data.Dataset):
-    def __init__(self, data, image_folder_path=None):
-        self.data = data
-        self.image_folder_path = image_folder_path
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, index):
-        conversation = self.data["conversations"][index]
-        image_path = self.data["image"][index]
-        if self.image_folder_path is not None:
-            image_path = f"{self.image_folder_path}/{image_path}"
-        img = Image.open(image_path)
-        instruction = conversation[0]["value"]
-        answer = conversation[1]["value"]
-
-        instruction_answer = instruction + "\n\nAnswer:" + answer
-        return instruction_answer, img
-
-
-class MyCustomDataCollator:
-    def __init__(self, processor):
-        self.processor = processor
-
-    def __call__(self, examples):
-        instruction_answers = [item[0] for item in examples]
-        images = [item[1] for item in examples]
-        
-        tokenizer_outputs = self.processor.tokenizer(
-            instruction_answers, padding=True, truncation=True, return_tensors="pt"
-        )
-        input_ids = tokenizer_outputs['input_ids']
-        attention_mask = tokenizer_outputs['attention_mask']
-
-        pixel_values = self.processor.image_processor(
-            #images=images, return_tensors="pt", padding=True
-            images=images, return_tensors="pt"
-        )["pixel_values"]
-
-        #if torch.isnan(input_ids).any() or torch.isinf(input_ids).any():
-        #    raise ValueError("NaN or Inf found in input_ids during batching")
-
-        #if torch.isnan(attention_mask).any() or torch.isinf(attention_mask).any():
-        #    raise ValueError("NaN or Inf found in attention_mask during batching")
-
-        #if torch.isnan(pixel_values).any() or torch.isinf(pixel_values).any():
-        #    raise ValueError("NaN or Inf found in pixel_values during batching")
-
-        batch = {
-            'input_ids': input_ids,
-            'attention_mask': attention_mask,
-            'pixel_values': pixel_values,
-            'labels': input_ids
-        }
-        return batch
-
-
-class ImageTextInstructionFollowingDataset2(torch.utils.data.Dataset):
-    def __init__(self, data, image_folder_path=None):
-        self.data = data
-        self.image_folder_path = image_folder_path
-
-    def __len__(self):
-        return len(self.data)
-
-    def __getitem__(self, index):
-        conversation = self.data["hf_format_conversations"][index]
-        image_path = self.data["image"][index]
-        img = None  # Default to None if no image is found
-        if self.image_folder_path is not None:
-            if image_path:
-                image_path = f"{self.image_folder_path}/{image_path}"
-                try:
-                    img = Image.open(image_path)
-                except FileNotFoundError:
-                    print(f"Image not found at {image_path}")
-        return conversation, img
-
-class MyCustomDataCollator2:
-    def __init__(self, processor):
-        self.processor = processor
-
-    def __call__(self, examples):
-        conversations = [item[0] for item in examples]
-        images = [item[1] for item in examples]
-        conversations_formatted = [processor.tokenizer.apply_chat_template(conversation, tokenize=False) for conversation in conversations]
-        tokenizer_outputs = self.processor.tokenizer(
-            conversations_formatted, padding=True, truncation=True, return_tensors="pt"
-        )
-        input_ids = tokenizer_outputs['input_ids']
-        attention_mask = tokenizer_outputs['attention_mask']
-        
-        if any(img is not None for img in images):
-            non_none_images = [img for img in images if img is not None]
-            pixel_values = self.processor.image_processor(
-                images=non_none_images, 
-                return_tensors="pt"
-            )["pixel_values"]
-        else:
-            pixel_values = [None for i in range(len(examples))]
-
-        batch = {
-            'input_ids': input_ids,
-            'attention_mask': attention_mask,
-            'pixel_values': pixel_values,
-            'labels': input_ids
-        }
-        return batch
-
-
-
 def get_processor(image_processor_id, tokenizer_id, image_token):
     image_processor = CLIPImageProcessor.from_pretrained(image_processor_id)
     tokenizer = AutoTokenizer.from_pretrained(tokenizer_id)
 
     image_token_to_add = image_token
     tokenizer.add_tokens([image_token_to_add])
-
-    #image_token_index = tokenizer(image_token_to_add)['input_ids'][0]
 
     tokenizer.pad_token = tokenizer.eos_token
 
@@ -181,9 +67,6 @@ def get_model(vision_tower_id, language_model_id, tokenizer, image_token):
     configuration._attn_implementation = "flash_attention_2"
     configuration.image_token_index = tokenizer(image_token)['input_ids'][0]
     configuration.pad_token_id = tokenizer.pad_token_id
-
-    print(f"hahahahaha {tokenizer(image_token)['input_ids'][0]}")
-    print(f"hahahahaha {tokenizer.pad_token}")
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = CustomLlavaForConditionalGeneration(configuration).to(device)

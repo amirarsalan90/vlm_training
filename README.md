@@ -7,7 +7,7 @@ The training process involves two steps:
 2. LORA fine-tuning for instruction tuning
 
 # Projector Training Data Preparation
-Download the 558K subset of the LAION-CC-SBU dataset with BLIP captions from [here](https://huggingface.co/datasets/liuhaotian/LLaVA-Pretrain) . Organize the images according to the folder structure described in the README file.
+Download the 558K subset of the LAION-CC-SBU dataset with BLIP captions from [here](https://huggingface.co/datasets/liuhaotian/LLaVA-Pretrain) . Organize the images according to the folder structure described below.
 
 
 

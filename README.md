@@ -11,7 +11,7 @@ Download the 558K subset of the LAION-CC-SBU dataset with BLIP captions from [he
 
 
 
-# LORA Instruction Fine-tuning Data Preparation
+# Instruction Fine-tuning Data Preparation
 Download the annotation of the final mixture llava instruction tuning data [llava_v1_5_mix665k.json](https://huggingface.co/datasets/liuhaotian/LLaVA-Instruct-150K/blob/main/llava_v1_5_mix665k.json), and download the images from following datasets:
 
 - COCO: [train2017](http://images.cocodataset.org/zips/train2017.zip)
@@ -46,7 +46,19 @@ data
 
 # Projector Training
 
-```pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
 python prepare_projector_data.py
-python run_train_projector.py```
+python run_train_projector.py
+```
 
+
+# LORA Instruction Fine-tuning
+
+```bash
+python prepare_instruction_data.py
+python run_train_instruction_lora.py
+```
+
+# Inference
+Finally, use the `inference.ipynb` to run inference.

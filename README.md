@@ -6,10 +6,12 @@ The training process involves two steps:
 1. Training the projector (while freezing the LLM and Vision tower)
 2. LORA fine-tuning for instruction tuning
 
-# Training the Projector
+# Projector Training Data Preparation
 Download the 558K subset of the LAION-CC-SBU dataset with BLIP captions from [here](https://huggingface.co/datasets/liuhaotian/LLaVA-Pretrain) . Organize the images according to the folder structure described in the README file.
 
-# LORA Instruction Fine-tuning
+
+
+# LORA Instruction Fine-tuning Data Preparation
 Download the annotation of the final mixture llava instruction tuning data [llava_v1_5_mix665k.json](https://huggingface.co/datasets/liuhaotian/LLaVA-Instruct-150K/blob/main/llava_v1_5_mix665k.json), and download the images from following datasets:
 
 - COCO: [train2017](http://images.cocodataset.org/zips/train2017.zip)
@@ -42,4 +44,9 @@ data
     └── images
 ```
 
+# Projector Training
+
+`pip install -r requirements.txt`
+`python prepare_projector_data.py`
+`python run_train_projector.py`
 

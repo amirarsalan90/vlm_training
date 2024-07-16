@@ -46,7 +46,7 @@ data
 
 # Projector Training
 
-`pip install -r requirements.txt`
-`python prepare_projector_data.py`
-`python run_train_projector.py`
+```pip install -r requirements.txt
+python prepare_projector_data.py
+python run_train_projector.py```
 

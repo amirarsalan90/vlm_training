@@ -8,9 +8,9 @@ from transformers import Trainer
 from modules.model import get_processor, get_model
 from modules.utils import ProjectorTrainingDataset, ProjectorTrainingDataCollator, freeze_network, count_trainable_parameters
 
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-os.environ["WANDB_PROJECT"]="vlm"
-wandb.login()
+#os.environ["TOKENIZERS_PARALLELISM"] = "false"
+#os.environ["WANDB_PROJECT"]="vlm"
+#wandb.login()
 
 
 processor = get_processor(
@@ -25,15 +25,15 @@ model = get_model(vision_tower_id="openai/clip-vit-large-patch14",
                   image_token="<image>"
                   )
 
-train_df = pd.read_json("/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/chat_train.json", lines=True)
+train_df = pd.read_json("./data/projector_training/chat_train.json", lines=True)
 
 train_dataset = ProjectorTrainingDataset(data=train_df, 
-                                                     image_folder_path="/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/images"
+                                                     image_folder_path="./data/projector_training/images"
                                                      )
 
-eval_df = pd.read_json("/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/chat_val_5K.json", lines=True)
+eval_df = pd.read_json("./data/projector_training/chat_val_5K.json", lines=True)
 eval_dataset = ProjectorTrainingDataset(data=eval_df, 
-                                                    image_folder_path="/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/images"
+                                                    image_folder_path="./data/projector_training/images"
                                                     )
 
 data_collator = ProjectorTrainingDataCollator(processor=processor)

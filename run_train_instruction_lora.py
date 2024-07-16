@@ -21,7 +21,8 @@ processor = get_processor(
     image_token="<image>"
     )
 
-checkpoint_path = "./training/outputs/phi_adaptor_hf/checkpoint-4000/"
+checkpoint_path = "./outputs/phi_adaptor_hf/checkpoint-4000/"
+
 
 model = LlavaForConditionalGeneration.from_pretrained(checkpoint_path)
 
@@ -39,14 +40,14 @@ processor.tokenizer.chat_template = PHI_CHAT_TEMPLATE
 
 data_collator = InstructionFineTuningDataCollator(processor=processor)
 
-train_df = pd.read_json("/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/instruction_finetune/instruction_train_all.json", lines=True)
+train_df = pd.read_json("./data/instruction_finetuning/instruction_train_all.json", lines=True)
 train_dataset = InstructionFineTuningDataset(data=train_df, 
-                                                     image_folder_path="/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/instruction_finetune"
+                                                     image_folder_path="./data/instruction_finetuning"
                                                      )
 
-eval_df = pd.read_json("/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/instruction_finetune/instruction_val_5K_all.json", lines=True)
+eval_df = pd.read_json("./data/instruction_finetuning/instruction_val_5K_all.json", lines=True)
 eval_dataset = InstructionFineTuningDataset(data=eval_df, 
-                                                     image_folder_path="/home/arsalan/Desktop/multimodal_LLM-master/multimodal_LLM-master/data/instruction_finetune"
+                                                     image_folder_path="./data/instruction_finetuning"
                                                      )
 
 training_args = TrainingArguments(
@@ -55,7 +56,7 @@ training_args = TrainingArguments(
     learning_rate=1.4e-5,
     per_device_train_batch_size=8,
     gradient_accumulation_steps=1,
-    logging_steps=5,
+    logging_steps=1,
     num_train_epochs=1,
     push_to_hub=False,
     gradient_checkpointing=True,

@@ -1,5 +1,5 @@
 # vlm_training
-This repository includes training code for the Vision Language Model (VLM) using the Transformers library. The LLM used is [phi-1_5](https://huggingface.co/microsoft/phi-1_5) and the vision model is [clip-vit-large-patch14](https://huggingface.co/openai/clip-vit-large-patch14). The LLM is relatively lightweight, with only 1.5 billion parameters. This makes it feasible to train on consumer-grade GPUs, such as the NVIDIA RTX 4090.
+This repository includes training code for the [LLaVA](https://llava-vl.github.io/) Vision Language Model (VLM) using the Transformers library. The LLM used is [phi-1_5](https://huggingface.co/microsoft/phi-1_5) and the vision model is [clip-vit-large-patch14](https://huggingface.co/openai/clip-vit-large-patch14). The LLM is relatively lightweight, with only 1.3 billion parameters. This makes it feasible to train on consumer-grade GPUs, such as the NVIDIA RTX 4090.
 
 The training process involves two steps:
 
